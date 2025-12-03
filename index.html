@@ -30,25 +30,33 @@
       }
     </script>
 
-    <!-- React & Libraries (UMD for file:// support) -->
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <!-- React & Libraries -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/history@5/umd/history.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-router@6.3.0/umd/react-router.development.js"></script>
-    <script crossorigin src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-router@6.3.0/umd/react-router.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-router-dom@6.3.0/umd/react-router-dom.production.min.js"></script>
     
     <!-- Babel for JSX -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <style>
       body { font-family: 'Noto Kufi Arabic', sans-serif; }
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar { width: 8px; }
+      ::-webkit-scrollbar-track { background: #f1f1f1; }
+      ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+      ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+      
+      .fade-in { animation: fadeIn 0.5s ease-out forwards; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 <script type="importmap">
 {
   "imports": {
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react": "https://aistudiocdn.com/react@^19.2.1",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
     "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.0",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
   }
@@ -62,8 +70,12 @@
         const { useState, useEffect } = React;
         const { HashRouter, Routes, Route, Link, useLocation, useNavigate, useParams, Navigate } = ReactRouterDOM;
 
-        // --- CONSTANTS ---
+        // --- 1. CONSTANTS & DATA ---
+        
+        // كلمة المرور (API Key)
         const API_KEY = "123";
+
+        // Empty PDF Base64 (ملف PDF فارغ للتحميل)
         const BLANK_PDF = "data:application/pdf;base64,JVBERi0xLjcKCjEgMCBvYmogDwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmogDwovS2lkcyBbMyAwIFJdCi9Db3VudCAxCj4+CmVuZG9iagozIDAgb2JqIAwKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA1OTUgODQyXQovUmVzb3VyY2VzIDw8Pj4KL0NvbnRlbnRzIDQgMCBSCj4+CmVuZG9iago0IDAgb2JqIAwKL0xlbmd0aCAwCj4+CnN0cmVhbQplbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCA1CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAxMCAwMDAwMCBuIAowMDAwMDAwMDYwIDAwMDAwIG4gCjAwMDAwMDAxMTEgMDAwMDAgbiAKMDAwMDAwMDIxMyAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDUKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjI2MgolJUVPRgo=";
 
         const ACCOUTING_MATERIAL = {
@@ -84,7 +96,7 @@
             ]
         };
 
-        // --- ICONS (SVG Components) ---
+        // --- 2. ICONS (SVG Components) ---
         const IconBase = ({ d, size = 24, className = "" }) => (
             <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
                 {d}
@@ -95,23 +107,23 @@
         const MenuIcon = (props) => <IconBase {...props} d={<><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="18" x2="20" y2="18"/></>} />;
         const XIcon = (props) => <IconBase {...props} d={<><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></>} />;
         const Phone = (props) => <IconBase {...props} d={<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>} />;
-        const FileText = (props) => <IconBase {...props} d={<><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></>} />;
+        const FileText = (props) => <IconBase {...props} d={<><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></>} />;
         const Download = (props) => <IconBase {...props} d={<><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></>} />;
         const Eye = (props) => <IconBase {...props} d={<><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></>} />;
         const ChevronLeft = (props) => <IconBase {...props} d={<polyline points="15 18 9 12 15 6"/>} />;
-        const Share2 = (props) => <IconBase {...props} d={<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>} />;
+        const Share2 = (props) => <IconBase {...props} d={<><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></>} />;
         const CheckCircle = (props) => <IconBase {...props} d={<><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></>} />;
         const AlertCircle = (props) => <IconBase {...props} d={<><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>} />;
+        const Lock = (props) => <IconBase {...props} d={<><rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0 1 10 0v4" /></>} />;
 
-        // --- COMPONENTS ---
-        
+        // --- 3. COMPONENTS ---
+
         const Button = ({ children, variant = 'primary', size = 'md', fullWidth = false, className = '', ...props }) => {
             const baseStyles = "inline-flex items-center justify-center rounded-lg font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2";
             const variants = {
                 primary: "bg-primary text-white hover:bg-secondary focus:ring-primary",
                 secondary: "bg-gray-800 text-white hover:bg-gray-900 focus:ring-gray-800",
                 outline: "border-2 border-primary text-primary hover:bg-blue-50 focus:ring-primary",
-                success: "bg-green-600 text-white hover:bg-green-700 focus:ring-green-600",
                 accent: "bg-accent text-white hover:bg-amber-600 focus:ring-accent",
             };
             const sizes = {
@@ -121,10 +133,7 @@
             };
             const widthClass = fullWidth ? "w-full" : "";
             return (
-                <button 
-                    className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${widthClass} ${className}`}
-                    {...props}
-                >
+                <button className={`${baseStyles} ${variants[variant]} ${sizes[size]} ${widthClass} ${className}`} {...props}>
                     {children}
                 </button>
             );
@@ -162,16 +171,16 @@
                                 <Link to="/" className={isActive('/')}>الرئيسية</Link>
                                 <Link to="/mohasaba-1" className={isActive('/mohasaba-1')}>المحاسبة 1</Link>
                                 <Link to="/about" className={isActive('/about')}>من نحن</Link>
-                                <a href="#contact" className="text-gray-600 hover:text-primary">تواصل</a>
+                                <Link to="/#contact" className="text-gray-600 hover:text-primary">تواصل</Link>
                             </nav>
                             <div className="hidden md:flex items-center">
-                                <a href="https://wa.me/218XXXXXXXXX" target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors">
+                                <a href="https://wa.me/218XXXXXXXXX" target="_blank" className="inline-flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-full text-sm font-medium transition-colors">
                                     <Phone size={16} />
                                     <span>واتساب</span>
                                 </a>
                             </div>
                             <div className="md:hidden flex items-center">
-                                <button onClick={toggleMenu} className="text-gray-500 hover:text-gray-700 focus:outline-none p-2">
+                                <button onClick={toggleMenu} className="text-gray-500 hover:text-gray-700 p-2">
                                     {isMenuOpen ? <XIcon size={24} /> : <MenuIcon size={24} />}
                                 </button>
                             </div>
@@ -183,7 +192,7 @@
                                 <Link to="/" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">الرئيسية</Link>
                                 <Link to="/mohasaba-1" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">المحاسبة 1</Link>
                                 <Link to="/about" onClick={toggleMenu} className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-50">من نحن</Link>
-                                <a href="https://wa.me/218XXXXXXXXX" target="_blank" rel="noopener noreferrer" className="block mt-4 text-center w-full bg-green-500 text-white px-4 py-3 rounded-lg font-bold">تواصل عبر واتساب</a>
+                                <a href="https://wa.me/218XXXXXXXXX" className="block mt-4 text-center w-full bg-green-500 text-white px-4 py-3 rounded-lg font-bold">تواصل عبر واتساب</a>
                             </div>
                         </div>
                     )}
@@ -198,29 +207,26 @@
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             <div>
                                 <h3 className="text-xl font-bold mb-4">ملخصاتي</h3>
-                                <p className="text-gray-300 mb-4 text-sm leading-relaxed">
-                                    منصة طلابية تهدف لتوفير ملخصات دراسية عالية الجودة ومجانية لمساعدة الطلاب على التفوق.
-                                </p>
+                                <p className="text-gray-300 mb-4 text-sm leading-relaxed">منصة طلابية تهدف لتوفير ملخصات دراسية عالية الجودة ومجانية لمساعدة الطلاب على التفوق.</p>
                                 <div className="flex flex-col gap-2 text-sm text-gray-300">
                                     <a href="https://wa.me/218XXXXXXXXX" className="flex items-center gap-2 hover:text-white">
-                                        <Phone size={16} />
-                                        <span>واتساب: +218XXXXXXXXX</span>
+                                        <Phone size={16} /><span>واتساب: +218XXXXXXXXX</span>
                                     </a>
                                 </div>
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold mb-4">روابط سريعة</h3>
                                 <ul className="space-y-2 text-sm text-gray-300">
-                                    <li><Link to="/" className="hover:text-white transition-colors">الرئيسية</Link></li>
-                                    <li><Link to="/mohasaba-1" className="hover:text-white transition-colors">ملخص محاسبة 1</Link></li>
-                                    <li><Link to="/about" className="hover:text-white transition-colors">من نحن</Link></li>
+                                    <li><Link to="/" className="hover:text-white">الرئيسية</Link></li>
+                                    <li><Link to="/mohasaba-1" className="hover:text-white">ملخص محاسبة 1</Link></li>
+                                    <li><Link to="/about" className="hover:text-white">من نحن</Link></li>
                                 </ul>
                             </div>
                             <div>
                                 <h3 className="text-lg font-bold mb-4">قانوني</h3>
                                 <ul className="space-y-2 text-sm text-gray-300">
-                                    <li><Link to="/privacy" className="hover:text-white transition-colors">سياسة الخصوصية</Link></li>
-                                    <li><Link to="/terms" className="hover:text-white transition-colors">شروط الاستخدام</Link></li>
+                                    <li><Link to="/privacy" className="hover:text-white">سياسة الخصوصية</Link></li>
+                                    <li><Link to="/terms" className="hover:text-white">شروط الاستخدام</Link></li>
                                 </ul>
                             </div>
                         </div>
@@ -232,11 +238,53 @@
             );
         };
 
-        // --- PAGES ---
+        // --- AUTH COMPONENT ---
+        const LoginScreen = ({ onLogin }) => {
+            const [password, setPassword] = useState("");
+            const [error, setError] = useState("");
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (password === API_KEY) {
+                    onLogin();
+                } else {
+                    setError("مفتاح API غير صحيح");
+                }
+            };
+
+            return (
+                <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4" dir="rtl">
+                    <div className="bg-white p-8 rounded-2xl shadow-lg max-w-md w-full text-center fade-in">
+                        <div className="bg-blue-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-6 text-primary">
+                            <Lock size={32} />
+                        </div>
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">تسجيل الدخول</h1>
+                        <p className="text-gray-500 mb-6">هذا الموقع محمي. يرجى إدخال مفتاح API للمتابعة.</p>
+                        <form onSubmit={handleSubmit} className="space-y-4">
+                            <div>
+                                <input
+                                    type="password"
+                                    value={password}
+                                    onChange={(e) => { setPassword(e.target.value); setError(""); }}
+                                    className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all text-center text-lg tracking-widest"
+                                    placeholder="أدخل الرمز هنا (123)"
+                                    dir="ltr"
+                                />
+                            </div>
+                            {error && <p className="text-red-500 text-sm">{error}</p>}
+                            <Button fullWidth type="submit" size="lg">دخول</Button>
+                        </form>
+                    </div>
+                </div>
+            );
+        };
+
+        // --- 4. PAGES ---
 
         const Home = () => {
             const navigate = useNavigate();
             const handleDownload = (e) => {
+                e.preventDefault();
                 e.stopPropagation();
                 const link = document.createElement('a');
                 link.href = BLANK_PDF;
@@ -247,23 +295,16 @@
             };
 
             return (
-                <div className="min-h-screen bg-gray-50">
+                <div className="min-h-screen bg-gray-50 fade-in">
                     <section className="relative bg-gradient-to-l from-primary to-blue-700 text-white overflow-hidden">
-                        <div className="absolute inset-0 bg-blue-900 opacity-20" />
+                        <div className="absolute inset-0 bg-blue-900 opacity-20 bg-[url('https://images.unsplash.com/photo-1541339907198-e08756dedf3f?q=80&w=1920&auto=format&fit=crop')] bg-cover bg-center mix-blend-overlay" />
                         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10 text-center md:text-right">
                             <div className="md:w-2/3">
-                                <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">
-                                    ملخصات جامعية مجانية <br/> تحميل مباشر
-                                </h1>
-                                <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl">
-                                    تحميل ملخص مادة "محاسبة 1" بصيغة PDF — مجاني بالكامل. مصمم خصيصاً لمساعدتك في الامتحانات.
-                                </p>
-                                <div className="flex flex-col sm:flex-row gap-4">
-                                    <Button variant="accent" size="lg" onClick={() => navigate('/mohasaba-1')} className="bg-accent text-white hover:bg-amber-600 gap-2 font-bold">
-                                        تحميل ملخص محاسبة 1 الآن
-                                        <ChevronLeft size={20} />
-                                    </Button>
-                                </div>
+                                <h1 className="text-4xl md:text-5xl font-extrabold mb-4 leading-tight">ملخصات جامعية مجانية <br/> تحميل مباشر</h1>
+                                <p className="text-lg md:text-xl text-blue-100 mb-8 max-w-2xl">تحميل ملخص مادة "محاسبة 1" بصيغة PDF — مجاني بالكامل.</p>
+                                <Button variant="accent" size="lg" onClick={() => navigate('/mohasaba-1')} className="gap-2 font-bold bg-amber-500 hover:bg-amber-600">
+                                    تحميل ملخص محاسبة 1 الآن <ChevronLeft size={20} />
+                                </Button>
                             </div>
                         </div>
                     </section>
@@ -275,32 +316,22 @@
                                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow duration-300 overflow-hidden group">
                                     <div className="p-6">
                                         <div className="flex items-start justify-between mb-4">
-                                            <div className="bg-blue-50 p-3 rounded-lg">
-                                                <FileText className="text-primary h-8 w-8" />
-                                            </div>
+                                            <div className="bg-blue-50 p-3 rounded-lg"><FileText className="text-primary h-8 w-8" /></div>
                                             <span className="bg-green-100 text-green-800 text-xs font-bold px-2 py-1 rounded-full">مجاني</span>
                                         </div>
                                         <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-primary transition-colors">
                                             <Link to={`/${ACCOUTING_MATERIAL.slug}`}>{ACCOUTING_MATERIAL.title}</Link>
                                         </h3>
-                                        <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">
-                                            {ACCOUTING_MATERIAL.description}
-                                        </p>
+                                        <p className="text-gray-600 text-sm mb-4 leading-relaxed line-clamp-3">{ACCOUTING_MATERIAL.description}</p>
                                         <div className="flex items-center gap-4 text-xs text-gray-500 mb-6">
                                             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300"></span>PDF</span>
                                             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300"></span>{ACCOUTING_MATERIAL.fileSize}</span>
                                             <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-gray-300"></span>{ACCOUTING_MATERIAL.pageCount} صفحات</span>
                                         </div>
                                         <div className="flex flex-col gap-2">
-                                            <Button onClick={handleDownload} fullWidth className="gap-2 justify-center">
-                                                <Download size={18} />
-                                                تنزيل الملخص (PDF)
-                                            </Button>
+                                            <Button onClick={handleDownload} fullWidth className="gap-2 justify-center"><Download size={18} />تنزيل الملخص (PDF)</Button>
                                             <Link to={`/${ACCOUTING_MATERIAL.slug}`} className="w-full">
-                                                <Button variant="secondary" fullWidth className="gap-2 justify-center bg-gray-100 text-gray-700 hover:bg-gray-200 border-none">
-                                                    <Eye size={18} />
-                                                    عرض التفاصيل
-                                                </Button>
+                                                <Button variant="secondary" fullWidth className="gap-2 justify-center bg-gray-100 text-gray-700 hover:bg-gray-200 border-none"><Eye size={18} />عرض التفاصيل</Button>
                                             </Link>
                                         </div>
                                     </div>
@@ -316,9 +347,7 @@
             const { slug } = useParams();
             const material = ACCOUTING_MATERIAL;
             
-            if (slug !== material.slug && slug !== 'mohasaba-1') {
-                return <Navigate to="/" replace />;
-            }
+            if (slug && slug !== material.slug) return <Navigate to="/" replace />;
 
             const handleDownload = () => {
                 const link = document.createElement('a');
@@ -331,32 +360,24 @@
 
             const handleShare = () => {
                 if (navigator.share) {
-                    navigator.share({
-                        title: `ملخص ${material.title}`,
-                        text: material.description,
-                        url: window.location.href,
-                    }).catch(console.error);
+                    navigator.share({ title: `ملخص ${material.title}`, text: material.description, url: window.location.href }).catch(console.error);
                 } else {
                     alert('تم نسخ الرابط للحافظة!');
-                    navigator.clipboard.writeText(window.location.href);
+                    try { navigator.clipboard.writeText(window.location.href); } catch(e){}
                 }
             };
 
             return (
-                <div className="min-h-screen bg-gray-50 py-12">
+                <div className="min-h-screen bg-gray-50 py-12 fade-in">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                         <nav className="mb-6 text-sm text-gray-500 flex items-center gap-2">
-                            <a href="#" className="hover:text-primary">الرئيسية</a>
-                            <span>/</span>
-                            <span className="text-gray-900 font-medium">{material.title}</span>
+                            <Link to="/" className="hover:text-primary">الرئيسية</Link><span>/</span><span className="text-gray-900 font-medium">{material.title}</span>
                         </nav>
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                             <div className="lg:col-span-2">
                                 <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
                                     <div className="flex flex-col md:flex-row gap-6 mb-8">
-                                        <div className="flex-shrink-0 bg-blue-50 w-24 h-24 rounded-xl flex items-center justify-center text-primary">
-                                            <FileText size={48} />
-                                        </div>
+                                        <div className="flex-shrink-0 bg-blue-50 w-24 h-24 rounded-xl flex items-center justify-center text-primary"><FileText size={48} /></div>
                                         <div>
                                             <h1 className="text-3xl font-extrabold text-gray-900 mb-2">{material.title} — ملخص PDF</h1>
                                             <h2 className="text-lg text-gray-600 mb-4">{material.fullDescription}</h2>
@@ -368,51 +389,32 @@
                                         </div>
                                     </div>
                                     <div className="flex flex-col sm:flex-row gap-4 mb-8 border-b border-gray-100 pb-8">
-                                        <Button onClick={handleDownload} size="lg" className="flex-1 gap-2 shadow-lg shadow-blue-200">
-                                            <Download size={20} />
-                                            تحميل الآن (PDF)
-                                        </Button>
-                                        <Button onClick={handleShare} variant="secondary" size="lg" className="gap-2 bg-gray-100 text-gray-700 border-none hover:bg-gray-200">
-                                            <Share2 size={20} />
-                                            مشاركة
-                                        </Button>
+                                        <Button onClick={handleDownload} size="lg" className="flex-1 gap-2 shadow-lg shadow-blue-200"><Download size={20} />تحميل الآن (PDF)</Button>
+                                        <Button onClick={handleShare} variant="secondary" size="lg" className="gap-2 bg-gray-100 text-gray-700 border-none hover:bg-gray-200"><Share2 size={20} />مشاركة</Button>
                                     </div>
                                     <div className="mb-8">
                                         <h3 className="text-xl font-bold text-gray-900 mb-4">محتويات الملخص</h3>
                                         <ul className="space-y-3">
-                                            {material.topics.map((topic, index) => (
-                                                <li key={index} className="flex items-start gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
-                                                    <CheckCircle className="text-green-500 w-5 h-5 flex-shrink-0 mt-0.5" />
-                                                    <span>{topic}</span>
+                                            {material.topics.map((topic, i) => (
+                                                <li key={i} className="flex items-start gap-3 text-gray-700 bg-gray-50 p-3 rounded-lg">
+                                                    <CheckCircle className="text-green-500 w-5 h-5 flex-shrink-0 mt-0.5" /><span>{topic}</span>
                                                 </li>
                                             ))}
                                         </ul>
                                     </div>
                                     <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 flex gap-3 text-amber-800 text-sm">
-                                        <AlertCircle className="w-5 h-5 flex-shrink-0" />
-                                        <p>هذا الملخص مجهود طلابي للمساعدة في المراجعة. لا يغني عن الكتاب الجامعي أو محاضرات الدكتور.</p>
+                                        <AlertCircle className="w-5 h-5 flex-shrink-0" /><p>هذا الملخص مجهود طلابي للمساعدة في المراجعة. لا يغني عن الكتاب الجامعي أو محاضرات الدكتور.</p>
                                     </div>
                                     <AdPlaceholder location="banner" className="h-auto py-8" />
-                                    <div className="mt-8 pt-8 border-t border-gray-100 text-center">
-                                        <h4 className="font-bold text-gray-900 mb-3">هل كان الملخص مفيداً؟</h4>
-                                        <div className="flex justify-center gap-4">
-                                            <button className="px-6 py-2 border rounded-full hover:bg-green-50 hover:border-green-500 hover:text-green-700 transition-colors">نعم 👍</button>
-                                            <button className="px-6 py-2 border rounded-full hover:bg-red-50 hover:border-red-500 hover:text-red-700 transition-colors">لا 👎</button>
-                                        </div>
-                                    </div>
                                 </div>
                             </div>
                             <div className="lg:col-span-1 space-y-6">
                                 <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 sticky top-24">
                                     <h3 className="font-bold text-gray-900 mb-4">تحميل سريع</h3>
-                                    <p className="text-sm text-gray-500 mb-4">
-                                        اسم الملف: <span dir="ltr" className="font-mono bg-gray-100 px-1 rounded">{material.fileName}</span>
-                                    </p>
+                                    <p className="text-sm text-gray-500 mb-4">اسم الملف: <span dir="ltr" className="font-mono bg-gray-100 px-1 rounded">{material.fileName}</span></p>
                                     <Button onClick={handleDownload} fullWidth className="mb-2">تنزيل مباشر</Button>
                                     <p className="text-xs text-center text-gray-400 mt-2">آمن وخالي من الفيروسات</p>
-                                    <div className="mt-6">
-                                        <AdPlaceholder location="sidebar" />
-                                    </div>
+                                    <div className="mt-6"><AdPlaceholder location="sidebar" /></div>
                                 </div>
                             </div>
                         </div>
@@ -421,70 +423,55 @@
             );
         };
 
-        const About = () => {
-            return (
-                <div className="max-w-4xl mx-auto px-4 py-16">
-                    <h1 className="text-3xl font-bold mb-6 text-gray-900">من نحن</h1>
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 prose prose-lg">
-                        <p className="text-lg text-gray-700 leading-relaxed mb-6">أهلاً بك في موقع <strong>ملخصاتي</strong>.</p>
-                        <p className="text-gray-700 leading-relaxed mb-6">نحن مجموعة من الطلاب الجامعيين نسعى لتسهيل الرحلة الدراسية لزملائنا. لاحظنا صعوبة الحصول على ملخصات منظمة وواضحة لبعض المواد الأساسية، فقررنا إنشاء هذا الموقع ليكون مكتبة مجانية للملخصات.</p>
-                        <p className="text-gray-700 leading-relaxed mb-6">بدأنا بمادة المحاسبة 1 وسنقوم بإضافة المزيد من المواد قريباً بإذن الله. هدفنا هو نشر المعرفة ومساعدة الجميع على النجاح.</p>
-                        <div className="bg-blue-50 p-6 rounded-xl mt-8">
-                            <h3 className="font-bold text-blue-900 mb-2">تواصل معنا</h3>
-                            <p className="text-blue-800 mb-4">لديك ملخص تريد نشره؟ أو اقتراح لتطوير الموقع؟</p>
-                            <a href="https://wa.me/218XXXXXXXXX" className="inline-flex items-center gap-2 text-primary font-bold hover:underline">
-                                <Phone size={18} />
-                                تواصل عبر واتساب
-                            </a>
-                        </div>
+        const About = () => (
+            <div className="max-w-4xl mx-auto px-4 py-16 fade-in">
+                <h1 className="text-3xl font-bold mb-6 text-gray-900">من نحن</h1>
+                <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 prose prose-lg">
+                    <p className="text-lg text-gray-700 leading-relaxed mb-6">أهلاً بك في موقع <strong>ملخصاتي</strong>.</p>
+                    <p className="text-gray-700 leading-relaxed mb-6">نحن مجموعة من الطلاب الجامعيين نسعى لتسهيل الرحلة الدراسية لزملائنا.</p>
+                    <div className="bg-blue-50 p-6 rounded-xl mt-8">
+                        <h3 className="font-bold text-blue-900 mb-2">تواصل معنا</h3>
+                        <a href="https://wa.me/218XXXXXXXXX" className="inline-flex items-center gap-2 text-primary font-bold hover:underline"><Phone size={18} />تواصل عبر واتساب</a>
                     </div>
                 </div>
-            );
-        };
+            </div>
+        );
 
-        const Privacy = () => {
-            return (
-                <div className="max-w-4xl mx-auto px-4 py-16">
-                    <h1 className="text-3xl font-bold mb-6 text-gray-900">سياسة الخصوصية</h1>
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <p className="mb-4">تاريخ التحديث: {new Date().toLocaleDateString('ar-EG')}</p>
-                        <p className="mb-4">في ملخصاتي، نولي خصوصيتك أهمية بالغة. هذه الوثيقة تشرح باختصار المعلومات التي قد نجمعها وكيف نستخدمها.</p>
-                        <h3 className="text-xl font-bold mt-6 mb-3">1. المعلومات التي نجمعها</h3>
-                        <p className="mb-4 text-gray-700">نحن لا نطلب منك تسجيل الدخول لتحميل الملفات. قد نستخدم ملفات تعريف الارتباط (Cookies) لتحسين تجربة المستخدم وتحليل عدد الزيارات (عبر Google Analytics مستقبلاً).</p>
-                        <h3 className="text-xl font-bold mt-6 mb-3">2. الإعلانات</h3>
-                        <p className="mb-4 text-gray-700">قد نعرض إعلانات من طرف ثالث (مثل AdSense) أو إعلانات محلية. هذه الأطراف قد تجمع معلومات مجهولة المصدر لتقديم إعلانات تناسب اهتماماتك.</p>
-                        <h3 className="text-xl font-bold mt-6 mb-3">3. أمان الملفات</h3>
-                        <p className="mb-4 text-gray-700">جميع الملفات المرفوعة تم فحصها للتأكد من خلوها من البرمجيات الضارة.</p>
-                    </div>
+        const Privacy = () => (
+            <div className="max-w-4xl mx-auto px-4 py-16 fade-in">
+                <h1 className="text-3xl font-bold mb-6 text-gray-900">سياسة الخصوصية</h1>
+                <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <p className="mb-4 text-gray-700">نستخدم ملفات تعريف الارتباط لتحسين تجربة المستخدم. المحتوى مجاني.</p>
                 </div>
-            );
-        };
+            </div>
+        );
 
-        const Terms = () => {
-            return (
-                <div className="max-w-4xl mx-auto px-4 py-16">
-                    <h1 className="text-3xl font-bold mb-6 text-gray-900">شروط الاستخدام</h1>
-                    <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
-                        <ul className="list-disc list-inside space-y-4 text-gray-700">
-                            <li><strong>الاستخدام الشخصي:</strong> الملخصات المتوفرة مخصصة للاستخدام الشخصي والمذاكرة فقط.</li>
-                            <li><strong>حقوق الملكية:</strong> نحترم حقوق الملكية الفكرية. إذا كنت صاحب محتوى وترى أنه منشور دون إذن، يرجى التواصل معنا لإزالته فوراً.</li>
-                            <li><strong>إعادة البيع:</strong> يمنع بيع هذه الملخصات أو التربح منها مادياً دون إذن مسبق. المحتوى هنا مجاني 100%.</li>
-                            <li><strong>إخلاء المسؤولية:</strong> الملخصات هي مجهود بشري قابل للخطأ والصواب. نوصي دائماً بالرجوع للمصادر الجامعية الرسمية (الكتاب والمحاضرات) كمرجع أساسي.</li>
-                        </ul>
-                    </div>
+        const Terms = () => (
+            <div className="max-w-4xl mx-auto px-4 py-16 fade-in">
+                <h1 className="text-3xl font-bold mb-6 text-gray-900">شروط الاستخدام</h1>
+                <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
+                    <p className="text-gray-700">المواد مجانية للاستخدام الشخصي فقط، يرجى عدم إعادة بيعها.</p>
                 </div>
-            );
-        };
+            </div>
+        );
+
+        // --- 5. APP ROOT ---
 
         const ScrollToTop = () => {
             const { pathname } = useLocation();
-            useEffect(() => {
-                window.scrollTo(0, 0);
-            }, [pathname]);
+            useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
             return null;
         };
 
         const App = () => {
+            // حالة التحقق من الـ API Key
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+            // إذا لم يتم تسجيل الدخول، اعرض شاشة القفل
+            if (!isAuthenticated) {
+                return <LoginScreen onLogin={() => setIsAuthenticated(true)} />;
+            }
+
             return (
                 <HashRouter>
                     <ScrollToTop />
@@ -493,10 +480,11 @@
                         <Routes>
                             <Route path="/" element={<Home />} />
                             <Route path="/mohasaba-1" element={<MaterialDetail />} />
+                            <Route path="/:slug" element={<MaterialDetail />} />
                             <Route path="/about" element={<About />} />
                             <Route path="/privacy" element={<Privacy />} />
                             <Route path="/terms" element={<Terms />} />
-                            <Route path="*" element={<Home />} />
+                            <Route path="*" element={<Navigate to="/" replace />} />
                         </Routes>
                         <Footer />
                     </div>
