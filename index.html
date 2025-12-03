@@ -46,9 +46,9 @@
 <script type="importmap">
 {
   "imports": {
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.10.0",
     "lucide-react": "https://aistudiocdn.com/lucide-react@^0.555.0"
   }
@@ -63,6 +63,7 @@
         const { HashRouter, Routes, Route, Link, useLocation, useNavigate, useParams, Navigate } = ReactRouterDOM;
 
         // --- CONSTANTS ---
+        const API_KEY = "123";
         const BLANK_PDF = "data:application/pdf;base64,JVBERi0xLjcKCjEgMCBvYmogDwovUGFnZXMgMiAwIFIKPj4KZW5kb2JqCjIgMCBvYmogDwovS2lkcyBbMyAwIFJdCi9Db3VudCAxCj4+CmVuZG9iagozIDAgb2JqIAwKL1BhcmVudCAyIDAgUgovTWVkaWFCb3ggWzAgMCA1OTUgODQyXQovUmVzb3VyY2VzIDw8Pj4KL0NvbnRlbnRzIDQgMCBSCj4+CmVuZG9iago0IDAgb2JqIAwKL0xlbmd0aCAwCj4+CnN0cmVhbQplbmRzdHJlYW0KZW5kb2JqCnhyZWYKMCA1CjAwMDAwMDAwMDAgNjU1MzUgZiAKMDAwMDAwMDAxMCAwMDAwMCBuIAowMDAwMDAwMDYwIDAwMDAwIG4gCjAwMDAwMDAxMTEgMDAwMDAgbiAKMDAwMDAwMDIxMyAwMDAwMCBuIAp0cmFpbGVyCjw8Ci9TaXplIDUKL1Jvb3QgMSAwIFIKPj4Kc3RhcnR4cmVmCjI2MgolJUVPRgo=";
 
         const ACCOUTING_MATERIAL = {
